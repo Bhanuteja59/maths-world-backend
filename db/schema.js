@@ -1,11 +1,14 @@
+// db/schema.js
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
   {
-    username: { type: String, trim: true },
+    username: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String }, // optional for Google users
     googleId: { type: String, index: true },
+
+    // Scores + history
     scores: {
       easy: { type: Number, default: 0 },
       medium: { type: Number, default: 0 },
@@ -19,6 +22,10 @@ const UserSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+
+    // Password reset
+    resetToken: { type: String },
+    resetTokenExp: { type: Date },
   },
   { timestamps: true }
 );
