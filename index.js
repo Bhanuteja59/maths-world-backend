@@ -13,15 +13,16 @@ const userRoutes = require("./routes/user");
 const app = express();
 app.use(express.json());
 
-app.use(cors({  origin: 'https://maths-world.vercel.app' , credentials: true }));
-  
+app.use(cors({ origin: "https://maths-world.vercel.app", credentials: true }));
+
+
 // ✅ Session setup
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "dev_session_secret",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    cookie: { secure: false }, // change to true if using HTTPS
   })
 );
 
@@ -35,7 +36,7 @@ app.use("/auth", googleAuthRoutes);
 app.use("/user", userRoutes);
 
 // ✅ MongoDB
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.MONGO_URI)
