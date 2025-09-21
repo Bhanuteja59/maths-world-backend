@@ -70,6 +70,38 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// ======================= LOGIN =======================
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ success: false, message: "Email and password required" });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user)
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match)
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
+
+    const token = generateToken({ id: user._id, email: user.email });
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: userObj,
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+
 // ======================= FORGOT PASSWORD =======================
 router.post("/forgot-password", async (req, res) => {
   try {
