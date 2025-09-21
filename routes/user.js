@@ -140,9 +140,16 @@ router.post("/reset-password/:token", async (req, res) => {
 
 // ======================= GET CURRENT USER =======================
 router.get("/me", authMiddleware, async (req, res) => {
-  const userObj = req.user.toObject();
-  delete userObj.password;
-  res.json({ success: true, user: userObj });
+  try {
+    const user = await User.findById(req.user.id).select("-password"); // exclude password
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("Fetch user error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
+
 
 module.exports = router;
