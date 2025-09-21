@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 
 // ✅ Allow all origins (temporary for dev)
-app.use(cors({ origin: "*", credentials: true }));
+app.use(cors({ origin: "https://maths-world-backend.vercel.app", credentials: true }));
 
 // ✅ Session setup
 app.use(
