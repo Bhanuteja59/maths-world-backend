@@ -13,7 +13,26 @@ const userRoutes = require("./routes/user");
 const app = express();
 app.use(express.json());
 
-app.use(cors({ origin: "https://maths-world.vercel.app", credentials: true }));
+// ✅ CORS setup (allow deployed + localhost)
+const allowedOrigins = [
+  "https://maths-world.vercel.app",
+  "http://localhost:3000",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn("❌ Blocked by CORS:", origin); // log blocked origins
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 
 // ✅ Session setup
@@ -22,7 +41,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "dev_session_secret",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // change to true if using HTTPS
+    cookie: { secure: false }, // set to true if using HTTPS + custom domain
   })
 );
 
@@ -35,11 +54,17 @@ setupGoogleAuth(passport);
 app.use("/auth", googleAuthRoutes);
 app.use("/user", userRoutes);
 
-// ✅ MongoDB
+// ✅ MongoDB connection with pooling + timeout
 const PORT = process.env.PORT || 5000;
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 10000, // fail after 10s if no DB server
+    socketTimeoutMS: 45000, // close idle sockets after 45s
+    maxPoolSize: 10, // reuse up to 10 connections
+  })
   .then(() => {
     console.log("✅ Connected to MongoDB");
     app.listen(PORT, () => {
