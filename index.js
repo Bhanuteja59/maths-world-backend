@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 
 // ✅ Allow all origins (temporary for dev)
-app.use(cors({ origin: "https://maths-world-backend.vercel.app", credentials: true }));
+app.use(cors({ origin: process.env.PUBLIC_URL_FRONTEND , credentials: true }));
 
 // ✅ Session setup
 app.use(
@@ -22,7 +22,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "dev_session_secret",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // change to true if using HTTPS
+    cookie: { secure: false },
   })
 );
 
@@ -36,7 +36,7 @@ app.use("/auth", googleAuthRoutes);
 app.use("/user", userRoutes);
 
 // ✅ MongoDB
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 mongoose
   .connect(process.env.MONGO_URI)
